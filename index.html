@@ -1,0 +1,145 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <link rel="icon" href="https://darianm.dev/logo.png" type="image/png" />
+  <link rel="shortcut icon" href="https://darianm.dev/logo.png" type="image/png" />
+  <title>Darian M</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="description" content="Aspiring data scientist. I build with Python and JavaScript—projects ship to GitHub." />
+
+  <style>
+    :root{
+      --bg:#0b0e14; --fg:#e6e6e6; --muted:#9aa4b2; --card:#121725;
+      --acc:#6a5acd; --ring:rgba(106,90,205,.35); --border:#1a2031;
+      --shadow: 0 10px 30px rgba(0,0,0,.35), 0 0 30px var(--ring);
+      --radius:14px;
+    }
+    *{box-sizing:border-box}
+    body{
+      margin:0; background:radial-gradient(1200px 600px at 80% -10%,rgba(106,90,205,.15),transparent),
+                 radial-gradient(800px 400px at 10% 110%,rgba(72,187,255,.10),transparent),
+                 var(--bg);
+      color:var(--fg); font:16px/1.6 system-ui, sans-serif;
+    }
+    a{color:inherit; text-decoration:none}
+    .container{max-width:1000px; margin:0 auto; padding:28px 20px 80px}
+    header{display:flex; align-items:center; justify-content:space-between; padding:14px 0 22px; border-bottom:1px solid var(--border);}
+    .brand{display:flex; align-items:center; gap:12px}
+    .dot{width:14px; height:14px; border-radius:50%; background:radial-gradient(circle at 30% 30%, #fff, var(--acc));}
+    .cta {
+      padding:10px 14px;
+      border:1px solid var(--border);
+      border-radius:12px;
+      transition: all 0.2s ease;
+      cursor: pointer;
+      display:inline-block;
+      position: relative;
+      overflow: hidden;
+    }
+    .cta:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 0 12px var(--acc), 0 0 24px rgba(106,90,205,.6);
+      border-color: var(--acc);
+    }
+    .cta:active {
+      transform: scale(0.96);
+      box-shadow: 0 0 8px var(--acc) inset, 0 0 16px rgba(106,90,205,.5) inset;
+    }
+    .cta.primary{border-color:transparent; background:linear-gradient(180deg, #7b6df0, #5a49d6); color:white; font-weight:600}
+    .cta.primary:hover {
+      animation: glowPulse 1.5s infinite alternate;
+    }
+    @keyframes glowPulse {
+      from {
+        box-shadow: 0 0 12px var(--acc), 0 0 24px rgba(106,90,205,.6);
+      }
+      to {
+        box-shadow: 0 0 20px var(--acc), 0 0 40px rgba(106,90,205,.8);
+      }
+    }
+    main{display:grid; gap:28px; margin-top:26px}
+    .hero {
+      padding:28px;
+      border:1px solid var(--border);
+      border-radius:var(--radius);
+      text-align:center;
+    }
+    .hero .cta.primary { margin-top:16px; }
+    /* Space between header nav buttons */
+    nav a {
+      margin-left: 8px;
+    }
+    nav a:first-child {
+      margin-left: 0;
+    }
+    @media (max-width: 600px) {
+      header nav {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+        align-items: flex-end;
+      }
+      header nav a {
+        margin-left: 0;
+      }
+    }
+    .title{font-size: clamp(28px, 4.2vw, 46px); margin:6px 0 10px;}
+    .subtitle{color:#cfd3dc; margin:0 0 18px}
+    .grid{display:grid; grid-template-columns:repeat(auto-fill, minmax(260px,1fr)); gap:14px;}
+    .card{border:1px solid var(--border); border-radius:14px; padding:16px;}
+    .card h3{margin:0 0 6px; font-size:16px}
+    .meta{color:var(--muted); font-size:12px}
+    .desc{color:#d8dde8; font-size:14px; margin:8px 0 12px; min-height:44px}
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <div class="brand">
+        <img src="https://darianm.dev/logo.png" alt="Logo" style="height:48px;width:auto;">
+        <h1>Darian M — Portfolio</h1>
+      </div>
+      <nav>
+        <img src="https://upload.wikimedia.org/wikipedia/commons/a/a5/Instagram_icon.png" alt="Instagram" style="height:32px;width:32px;cursor:pointer;" onclick="window.open('https://instagram.com/darianphx','_blank')">
+      </nav>
+    </header>
+
+    <main>
+      <section class="hero">
+        <h2 class="title">Aspiring data scientist focused on analysis and clean code.</h2>
+        <p class="subtitle">I build with Python and JavaScript. Projects ship to GitHub—explore the code and changelogs.</p>
+        <a id="ghCTA" class="cta primary" href="#">View GitHub</a>
+      </section>
+
+      <section>
+        <h2>Recent Work (from GitHub)</h2>
+        <div id="projects" class="grid"></div>
+      </section>
+    </main>
+  </div>
+
+  <script>
+    document.getElementById("ghCTA").href = "https://github.com/darianmis";
+
+    async function fetchRepos() {
+      const res = await fetch("https://api.github.com/users/darianmis/repos?per_page=100&sort=updated");
+      const all = await res.json();
+      return all.filter(r => !r.fork).slice(0,8);
+    }
+
+    function projectCard(repo){
+      return `<a class="card" href="${repo.html_url}" target="_blank">
+        <h3>${repo.name}</h3>
+        <p class="desc">${repo.description || "No description yet"}</p>
+        <div class="meta">${repo.language || "Code"} • Updated ${new Date(repo.pushed_at).toLocaleDateString()}</div>
+      </a>`;
+    }
+
+    (async () => {
+      const repos = await fetchRepos();
+      document.getElementById("projects").innerHTML = repos.map(projectCard).join("");
+    })();
+  </script>
+</body>
+</html>
